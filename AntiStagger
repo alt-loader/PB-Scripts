@@ -1,0 +1,20 @@
+local lp = game:GetService("Players").LocalPlayer
+
+local function fix(c)
+	if not c then return end
+	local s = c:WaitForChild("Stagger", 10)
+	if s then
+		s.Disabled = true
+		print("S - false")
+	end
+end
+
+if lp.Character then 
+	fix(lp.Character) 
+end
+
+lp.CharacterAdded:Connect(fix)
+print("Auto-b")
+-- I am not responsible for any consequences resulting from the use of this script. 
+-- Using this software is unfair to other players and may lead to a permanent ban for exploiting.
+-- Thanks for choosing my scripts! Stay updated and get more here: https://t.me/+13zaI4XqezsyNTMy
