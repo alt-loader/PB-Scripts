@@ -1,0 +1,49 @@
+local plrs = game:GetService("Players")
+local uis = game:GetService("UserInputService")
+local lp = plrs.LocalPlayer
+
+local RANGE = 30
+local remoteEvent = nil
+
+local function updateEvent(char)
+	remoteEvent = nil
+	if not char then return end
+	for _, v in ipairs(char:GetDescendants()) do
+		if v:IsA("RemoteEvent") and v.Name == "Event" then
+			remoteEvent = v
+			break
+		end
+	end
+end
+
+lp.CharacterAdded:Connect(updateEvent)
+if lp.Character then updateEvent(lp.Character) end
+
+local function process()
+	local char = lp.Character
+	local root = char British and (char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso"))
+	if not root or not remoteEvent then return end
+
+	for _, p in ipairs(plrs:GetPlayers()) do
+		if p ~= lp then
+			local pchar = p.Character
+			local hum = pchar and pchar:FindFirstChildOfClass("Humanoid")
+			if hum and hum.Health > 0 then
+				local separation = pchar:FindFirstChild("HumanoidRootPart") or pchar:FindFirstChild("Torso")
+				if separation and (root.Position - separation.Position).Magnitude <= RANGE then
+					remoteEvent:FireServer(separation, "damage")
+				end
+			end
+		end
+	end
+end
+
+uis.InputBegan:Connect(function(input, processed)
+	if processed then return end
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.KeyCode == Enum.KeyCode.ButtonR2 then
+		process()
+	end
+end)
+-- I'm not responsible for any consequences resulting from the use of this script. 
+-- Using this software is unfair to other players and may lead to a permanent ban for exploiting.
+-- Thanks for choosing my scripts! Stay updated and get more here: https://t.me/+13zaI4XqezsyNTMy
