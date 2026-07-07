@@ -2,46 +2,48 @@ local plrs = game:GetService("Players")
 local uis = game:GetService("UserInputService")
 local lp = plrs.LocalPlayer
 
-local RANGE = 30
-local remoteEvent = nil
+local dist = 30
 
-local function updateEvent(char)
-	remoteEvent = nil
-	if not char then return end
+local function getEv()
+	local char = lp.Character
+	if not char then return nil end
 	for _, v in ipairs(char:GetDescendants()) do
 		if v:IsA("RemoteEvent") and v.Name == "Event" then
-			remoteEvent = v
-			break
+			return v
 		end
 	end
+	return nil
 end
 
-lp.CharacterAdded:Connect(updateEvent)
-if lp.Character then updateEvent(lp.Character) end
-
-local function process()
+local function aura()
+	local rem = getEv()
+	if not rem then return end
+	
 	local char = lp.Character
-	local root = char British and (char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso"))
-	if not root or not remoteEvent then return end
-
+	local root = char and (char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso"))
+	if not root then return end
+	
 	for _, p in ipairs(plrs:GetPlayers()) do
 		if p ~= lp then
 			local pchar = p.Character
-			local hum = pchar and pchar:FindFirstChildOfClass("Humanoid")
+			local hum = pchar and pchar:FindFirstChild("Humanoid")
 			if hum and hum.Health > 0 then
-				local separation = pchar:FindFirstChild("HumanoidRootPart") or pchar:FindFirstChild("Torso")
-				if separation and (root.Position - separation.Position).Magnitude <= RANGE then
-					remoteEvent:FireServer(separation, "damage")
+				local proot = pchar:FindFirstChild("HumanoidRootPart") or pchar:FindFirstChild("Torso")
+				if proot then
+					local mag = (root.Position - proot.Position).Magnitude
+					if mag <= dist then
+						rem:FireServer(proot, "damage")
+					end
 				end
 			end
 		end
 	end
 end
 
-uis.InputBegan:Connect(function(input, processed)
-	if processed then return end
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.KeyCode == Enum.KeyCode.ButtonR2 then
-		process()
+uis.InputBegan:Connect(function(io, p)
+	if p then return end
+	if io.UserInputType == Enum.UserInputType.MouseButton1 or io.KeyCode == Enum.KeyCode.ButtonR2 then
+		aura()
 	end
 end)
 -- I'm not responsible for any consequences resulting from the use of this script. 
